@@ -4,7 +4,8 @@
   "exports": "./mod.ts",
   "tasks": {
     "gen": "deno run -A --unstable src/generator/gen.ts",
-    "check": "deno check --unstable src/api/UI/mod.ts"
+    "check": "deno check --unstable src/api/UI/mod.ts",
+    "publish": "deno task gen; deno publish --dry-run --unstable"
   },
   "publish": {
     "include": ["src/api", "mod.ts"]
