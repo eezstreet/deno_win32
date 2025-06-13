@@ -1,3 +1,5 @@
 .vscode/
 Windows.Win32.winmd
 deno.lock
+src/api/**/*.ts
+!src/api/**/mod.ts

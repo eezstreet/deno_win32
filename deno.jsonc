@@ -1,17 +1,23 @@
 {
+  "name": "@eezstreet/deno_win32", //You can create a scope at jsr.io/new. After you have created a scope, you can create a package in that scope. You can create a package at jsr.io/new.
+  "version": "0.0.1",
+  "exports": "./mod.ts",
   "tasks": {
-    "gen": "deno run -A --unstable generator/gen.ts",
-    "check": "deno check --unstable api/UI/mod.ts"
+    "gen": "deno run -A --unstable src/generator/gen.ts",
+    "check": "deno check --unstable src/api/UI/mod.ts"
+  },
+  "publish": {
+    "include": ["src/api"]
   },
   "fmt": {
     "exclude": [
-      "api",
+      "src/api",
       "win32_apis.json"
     ]
   },
   "lint": {
     "exclude": [
-      "api"
+      "src/api"
     ],
     "rules": {
       "exclude": [
