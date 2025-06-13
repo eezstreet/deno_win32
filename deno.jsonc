@@ -7,7 +7,7 @@
     "check": "deno check --unstable src/api/UI/mod.ts"
   },
   "publish": {
-    "include": ["src/api"]
+    "include": ["src/api", "mod.ts"]
   },
   "fmt": {
     "exclude": [

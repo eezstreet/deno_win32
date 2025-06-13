@@ -278,14 +278,15 @@ for (const api in win32) {
         value.toString().replaceAll("`", "\`").replaceAll("\\", "\\\\")
           .replaceAll(
             "\0",
-            "\\0",
+            "\\u0000",
           ).replaceAll("\r", "\\r").replaceAll("\t", "\\t").replaceAll(
             "\v",
             "\\v",
           ).replaceAll("\b", "\\b").replaceAll("\f", "\\f").replaceAll(
             "\n",
             "\\n",
-          ).split("").map((c: string) => {
+          ).replaceAll("`", "\\`")
+          .split("").map((c: string) => {
             if (c.match(/^[ -~]$/)) {
               return c;
             } else {
