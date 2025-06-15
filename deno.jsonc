@@ -1,6 +1,6 @@
 {
-  "name": "@eezstreet/deno_win32", //You can create a scope at jsr.io/new. After you have created a scope, you can create a package in that scope. You can create a package at jsr.io/new.
-  "version": "0.0.1",
+  "name": "@eezstreet/deno-win32",
+  "version": "1.0.0",
   "exports": "./mod.ts",
   "tasks": {
     "gen": "deno run -A --unstable src/generator/gen.ts",
