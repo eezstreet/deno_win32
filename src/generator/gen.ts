@@ -493,9 +493,7 @@ for (const api in win32) {
       content += `  constructor(private readonly _buf: Uint8Array) {\n`;
       content += `    this.view = new DataView(_buf.buffer);\n`;
       content += `  }\n\n`;
-      content += `  get buffer(): Uint8Array {\n`;
-      content += `    return this._buf;\n`;
-      content += `  }\n`;
+      content += `  get buffer(): Uint8Array { return this._buf; } \n`;
       i = 0;
       offset = 0;
       layout.forEach((ty) => {
@@ -509,83 +507,79 @@ for (const api in win32) {
             field.name = "_buffer";
           }
 
-          content += `  get ${field.name}(): ${typeToJS(ty)} {\n`;
+          content += `  get ${field.name}(): ${typeToJS(ty)} { `;
           switch (ty) {
             case "u8": {
-              content += `    return this.view.getUint8(${offset});\n`;
+              content += `return this.view.getUint8(${offset});`;
               break;
             }
 
             case "i8": {
-              content += `    return this.view.getInt8(${offset});\n`;
+              content += `return this.view.getInt8(${offset});`;
               break;
             }
 
             case "u16": {
-              content += `    return this.view.getUint16(${offset}, true);\n`;
+              content += `return this.view.getUint16(${offset}, true);`;
               break;
             }
 
             case "i16": {
-              content += `    return this.view.getInt16(${offset}, true);\n`;
+              content += `return this.view.getInt16(${offset}, true);`;
               break;
             }
 
             case "u32": {
-              content += `    return this.view.getUint32(${offset}, true);\n`;
+              content += `return this.view.getUint32(${offset}, true);`;
               break;
             }
 
             case "i32": {
-              content += `    return this.view.getInt32(${offset}, true);\n`;
+              content += `return this.view.getInt32(${offset}, true);`;
               break;
             }
 
             case "f32": {
-              content += `    return this.view.getFloat32(${offset}, true);\n`;
+              content += `return this.view.getFloat32(${offset}, true);`;
               break;
             }
 
             case "u64": {
               content +=
-                `    return BigInt(this.view.getBigUint64(${offset}, true));\n`;
+                `return BigInt(this.view.getBigUint64(${offset}, true));`;
               break;
             }
 
             case "i64": {
               content +=
-                `    return BigInt(this.view.getBigInt64(${offset}, true));\n`;
+                `return BigInt(this.view.getBigInt64(${offset}, true));`;
               break;
             }
 
             case "f64": {
-              content += `    return this.view.getFloat64(${offset}, true);\n`;
+              content += `return this.view.getFloat64(${offset}, true);`;
               break;
             }
 
             case "buffer": {
-              content +=
-                `    const ptr = this.view.getBigUint64(${offset}, true);\n`;
-              content += `    return Deno.UnsafePointer.create(ptr);\n`;
+              content += `return Deno.UnsafePointer.create(this.view.getBigUint64(${offset}, true));`;
               break;
             }
 
             case "pointer": {
-              content +=
-                `    const ptr = this.view.getBigUint64(${offset}, true);\n`;
-              content += `    return Deno.UnsafePointer.create(ptr);\n`;
+              content += `return Deno.UnsafePointer.create(this.view.getBigUint64(${offset}, true));`;
               break;
             }
 
             case "isize": {
               content +=
-                `    return BigInt(this.view.getBigInt64(${offset}, true));\n`;
+                `return BigInt(this.view.getBigInt64(${offset}, true));`;
               break;
             }
 
             case "usize": {
               content +=
-                `    return BigInt(this.view.getBigUint64(${offset}, true));\n`;
+                `return BigInt(this.view.getBigUint64(${offset}, true));`;
               break;
             }
 
@@ -593,7 +587,7 @@ for (const api in win32) {
               throw new Error("Unsupported type");
           }
           i++;
-          content += `  }\n`;
+          content += ` }\n`;
           offset += sizeof(ty as Deno.NativeType);
         }
       });
@@ -611,64 +605,64 @@ for (const api in win32) {
             field.name = "_buffer";
           }
 
-          content += `  set ${field.name}(value: ${typeToJS(ty)}) {\n`;
+          content += `  set ${field.name}(value: ${typeToJS(ty)}) { `;
           switch (ty) {
             case "u8": {
-              content += `    this.view.setUint8(${offset}, value);\n`;
+              content += `this.view.setUint8(${offset}, value);`;
               break;
             }
 
             case "i8": {
-              content += `    this.view.setInt8(${offset}, value);\n`;
+              content += `this.view.setInt8(${offset}, value);`;
               break;
             }
 
             case "u16": {
-              content += `    this.view.setUint16(${offset}, value, true);\n`;
+              content += `this.view.setUint16(${offset}, value, true);`;
               break;
             }
 
             case "i16": {
-              content += `    this.view.setInt16(${offset}, value, true);\n`;
+              content += `this.view.setInt16(${offset}, value, true);`;
               break;
             }
 
             case "u32": {
-              content += `    this.view.setUint32(${offset}, value, true);\n`;
+              content += `this.view.setUint32(${offset}, value, true);`;
               break;
             }
 
             case "i32": {
-              content += `    this.view.setInt32(${offset}, value, true);\n`;
+              content += `this.view.setInt32(${offset}, value, true);`;
               break;
             }
 
             case "f32": {
-              content += `    this.view.setFloat32(${offset}, value, true);\n`;
+              content += `this.view.setFloat32(${offset}, value, true);`;
               break;
             }
 
             case "u64": {
               content +=
-                `    this.view.setBigUint64(${offset}, BigInt(value), true);\n`;
+                `this.view.setBigUint64(${offset}, BigInt(value), true);`;
               break;
             }
 
             case "i64": {
               content +=
-                `    this.view.setBigInt64(${offset}, BigInt(value), true);\n`;
+                `this.view.setBigInt64(${offset}, BigInt(value), true);`;
               break;
             }
 
             case "f64": {
-              content += `    this.view.setFloat64(${offset}, value, true);\n`;
+              content += `this.view.setFloat64(${offset}, value, true);`;
               break;
             }
 
             case "buffer": {
               const special = specialTypes[fields[i][1]];
               // Attach the buffer to the view so it doesn't get GC'd
-              content += `    (this._buf as any)._f${offset} = value;\n`;
+              content += `\n    (this._buf as any)._f${offset} = value;\n`;
               content +=
                 `    this.view.setBigUint64(${offset}, BigInt(Deno.UnsafePointer.value(util.toPointer((this._buf as any)._f${offset}))), true);\n`;
               break;
@@ -676,19 +670,19 @@ for (const api in win32) {
 
             case "pointer": {
               content +=
-                `    this.view.setBigUint64(${offset}, BigInt(Deno.UnsafePointer.value(util.toPointer(value))), true);\n`;
+                `this.view.setBigUint64(${offset}, BigInt(Deno.UnsafePointer.value(util.toPointer(value))), true);`;
               break;
             }
 
             case "isize": {
               content +=
-                `    this.view.setBigInt64(${offset}, BigInt(value), true);\n`;
+                `this.view.setBigInt64(${offset}, BigInt(value), true);`;
               break;
             }
 
             case "usize": {
               content +=
-                `    this.view.setBigUint64(${offset}, BigInt(value), true);\n`;
+                `this.view.setBigUint64(${offset}, BigInt(value), true);`;
               break;
             }
 
@@ -696,7 +690,7 @@ for (const api in win32) {
               throw new Error("Unsupported type");
           }
           i++;
-          content += `  }\n`;
+          content += `}\n`;
           offset += sizeof(ty as Deno.NativeType);
         }
       });
