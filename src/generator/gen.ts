@@ -362,10 +362,12 @@ for (const api in win32) {
         align = 0;
       }
 
-      content += `/**\n * ${name} (size: ${size})\n */\n`;
+      // Omit because JSR is sensitive about size
+      //content += `/**\n * ${name} (size: ${size})\n */\n`;
       content += `export interface ${dispName} {\n`;
       for (const [field, ty] of fields) {
-        content += `  /** ${ty} */\n`;
+        // Omit because JSR is sensitive about size
+        //content += `  /** ${ty} */\n`;
         content += `  ${jsify(field)}: ${typeToJS(ty)};\n`;
       }
       content += `}\n\n`;
@@ -382,7 +384,8 @@ for (const api in win32) {
       let i = 0;
       let offset = 0;
       layout.forEach((ty) => {
-        content += `  // 0x${offset.toString(16).padStart(2, "0")}: ${ty}\n`;
+        // Omit for now as JSR is sensitive about this
+        //content += `  // 0x${offset.toString(16).padStart(2, "0")}: ${ty}\n`;
         if (ty.startsWith("pad")) {
           offset += parseInt(ty.slice(3));
         } else {
@@ -497,7 +500,8 @@ for (const api in win32) {
       i = 0;
       offset = 0;
       layout.forEach((ty) => {
-        content += `\n  // 0x${offset.toString(16).padStart(2, "0")}: ${ty}\n`;
+        // Omit for now as JSR is sensitive about size
+        //content += `\n  // 0x${offset.toString(16).padStart(2, "0")}: ${ty}\n`;
         if (ty.startsWith("pad")) {
           offset += parseInt(ty.slice(3));
         } else {
@@ -596,7 +600,8 @@ for (const api in win32) {
       i = 0;
       offset = 0;
       layout.forEach((ty) => {
-        content += `\n  // 0x${offset.toString(16).padStart(2, "0")}: ${ty}\n`;
+        // Omit for now as JSR is sensitive about sizes
+        //content += `  // 0x${offset.toString(16).padStart(2, "0")}: ${ty}\n`;
         if (ty.startsWith("pad")) {
           offset += parseInt(ty.slice(3));
         } else {
@@ -664,7 +669,7 @@ for (const api in win32) {
               // Attach the buffer to the view so it doesn't get GC'd
               content += `\n    (this._buf as any)._f${offset} = value;\n`;
               content +=
-                `    this.view.setBigUint64(${offset}, BigInt(Deno.UnsafePointer.value(util.toPointer((this._buf as any)._f${offset}))), true);\n`;
+                `this.view.setBigUint64(${offset}, BigInt(Deno.UnsafePointer.value(util.toPointer((this._buf as any)._f${offset}))), true);\n`;
               break;
             }
 
@@ -757,7 +762,8 @@ for (const api in win32) {
     }
     const { dll, parameters, result } = symbols[name];
     const args = parameters.map((e: [string, string]) =>
-      (jsify(e[0]) + ": " + typeToJS(e[1])) + " /* " + e[1] + " */,"
+      (jsify(e[0]) + ": " + typeToJS(e[1])) + ","
+      // (jsify(e[0]) + ": " + typeToJS(e[1])) + " /* " + e[1] + " */,"
     ).join("\n  ");
     const ret = typeToJS(result, true);
     const retFfi = typeToFFI(result);
