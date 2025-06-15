@@ -107,7 +107,7 @@ function typeToJS(ty: string, result = false) {
     case "i64":
     case "isize":
     case "usize":
-      return "bigint | number";
+      return "bigint";
     case "f32":
     case "f64":
       return "number";
@@ -269,12 +269,13 @@ for (const api in win32) {
     }
     const value = consts[name];
     if ((value + "").match(/^[0-9]+n?$/)) {
+      const valueType = (value + "").match(/^[0-9]+n$/) !== null ? "bigint" : "number";
       const ir = String(value).replaceAll(/^0+/g, "");
-      content += `export const ${name} = ${
-        ir === "" ? "0" : ir === "n" ? "0n" : ir
+        content += `export const ${name}:${valueType} = ${
+          ir === "" ? "0" : ir === "n" ? "0n" : ir
       };\n`;
     } else {
-      content += `export const ${name} = \`${
+      content += `export const ${name}:string = \`${
         value.toString().replaceAll("`", "\`").replaceAll("\\", "\\\\")
           .replaceAll(
             "\0",
@@ -374,10 +375,10 @@ for (const api in win32) {
       content += `export function alloc${
         camelCase(dispName)
       }(data?: Partial<${dispName}>): Uint8Array {\n`;
-      content += `  const buf = new Uint8Array(sizeof${
+      content += `  const _buf = new Uint8Array(sizeof${
         camelCase(dispName)
       });\n`;
-      content += `  const view = new DataView(buf.buffer);\n`;
+      content += `  const view = new DataView(_buf.buffer);\n`;
       let i = 0;
       let offset = 0;
       layout.forEach((ty) => {
@@ -451,11 +452,11 @@ for (const api in win32) {
             case "buffer": {
               const special = specialTypes[fields[i][1]];
               // Attach the buffer to the view so it doesn't get GC'd
-              content += `{\n    (buf as any)._f${offset} = ${
+              content += `{\n    (_buf as any)._f${offset} = ${
                 special ? (special.toFfi + "(") : ""
               }data.${field.name}${special ? ")" : ""};\n`;
               content +=
-                `    view.setBigUint64(${offset}, (buf as any)._f${offset} === null ? 0n : BigInt(Deno.UnsafePointer.value(Deno.UnsafePointer.of((buf as any)._f${offset}))), true);\n`;
+                `    view.setBigUint64(${offset}, (_buf as any)._f${offset} === null ? 0n : BigInt(Deno.UnsafePointer.value(Deno.UnsafePointer.of((_buf as any)._f${offset}))), true);\n`;
               content += "  }\n";
               break;
             }
@@ -485,15 +486,15 @@ for (const api in win32) {
           i++;
         }
       });
-      content += `  return buf;\n`;
+      content += `  return _buf;\n`;
       content += `}\n\n`;
       content += `export class ${dispName}View {\n`;
       content += `  private readonly view: DataView;\n`;
-      content += `  constructor(private readonly buf: Uint8Array) {\n`;
-      content += `    this.view = new DataView(buf.buffer);\n`;
+      content += `  constructor(private readonly _buf: Uint8Array) {\n`;
+      content += `    this.view = new DataView(_buf.buffer);\n`;
       content += `  }\n\n`;
       content += `  get buffer(): Uint8Array {\n`;
-      content += `    return this.buf;\n`;
+      content += `    return this._buf;\n`;
       content += `  }\n`;
       i = 0;
       offset = 0;
@@ -503,6 +504,11 @@ for (const api in win32) {
           offset += parseInt(ty.slice(3));
         } else {
           const field = { name: jsify(fields[i][0]) };
+          // Fix for reserved field names
+          if (field.name === "buffer") {
+            field.name = "_buffer";
+          }
+
           content += `  get ${field.name}(): ${typeToJS(ty)} {\n`;
           switch (ty) {
             case "u8": {
@@ -542,13 +548,13 @@ for (const api in win32) {
 
             case "u64": {
               content +=
-                `    return Number(this.view.getBigUint64(${offset}, true));\n`;
+                `    return BigInt(this.view.getBigUint64(${offset}, true));\n`;
               break;
             }
 
             case "i64": {
               content +=
-                `    return Number(this.view.getBigInt64(${offset}, true));\n`;
+                `    return BigInt(this.view.getBigInt64(${offset}, true));\n`;
               break;
             }
 
@@ -573,13 +579,13 @@ for (const api in win32) {
 
             case "isize": {
               content +=
-                `    return Number(this.view.getBigInt64(${offset}, true));\n`;
+                `    return BigInt(this.view.getBigInt64(${offset}, true));\n`;
               break;
             }
 
             case "usize": {
               content +=
-                `    return Number(this.view.getBigUint64(${offset}, true));\n`;
+                `    return BigInt(this.view.getBigUint64(${offset}, true));\n`;
               break;
             }
 
@@ -601,6 +607,10 @@ for (const api in win32) {
           offset += parseInt(ty.slice(3));
         } else {
           const field = { name: jsify(fields[i][0]) };
+          if (field.name === "buffer") {
+            field.name = "_buffer";
+          }
+
           content += `  set ${field.name}(value: ${typeToJS(ty)}) {\n`;
           switch (ty) {
             case "u8": {
@@ -658,9 +668,9 @@ for (const api in win32) {
             case "buffer": {
               const special = specialTypes[fields[i][1]];
               // Attach the buffer to the view so it doesn't get GC'd
-              content += `    (this.buf as any)._f${offset} = value;\n`;
+              content += `    (this._buf as any)._f${offset} = value;\n`;
               content +=
-                `    this.view.setBigUint64(${offset}, BigInt(Deno.UnsafePointer.value(util.toPointer((this.buf as any)._f${offset}))), true);\n`;
+                `    this.view.setBigUint64(${offset}, BigInt(Deno.UnsafePointer.value(util.toPointer((this._buf as any)._f${offset}))), true);\n`;
               break;
             }
 
@@ -783,7 +793,7 @@ for (const api in win32) {
       }: Promise<${ret}> /* ${result} */ {\n`;
       content += `  return ${
         retSpecial ? `${retSpecial.fromFfi}(` : ""
-      }await lib${jsify(dll)}.${name}Async(${
+      }await lib${jsify(dll)}.${name}Async!(${
         parameters.map((e: [string, string]) => {
           const special = specialTypes[e[1]];
           if (special) {

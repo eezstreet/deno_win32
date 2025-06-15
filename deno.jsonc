@@ -8,7 +8,7 @@
     "publish": "deno task gen; deno publish --dry-run --unstable"
   },
   "publish": {
-    "include": ["src/api", "mod.ts"]
+    "include": ["src/api", "mod.ts", "src/error.ts", "src/overlapped.ts", "src/util.ts"]
   },
   "fmt": {
     "exclude": [
